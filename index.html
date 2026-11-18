@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b241b">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Amigo invisible: introduce a quién te ha tocado regalar.">
+  <title>Amigo Invisible</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%81%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="snow" id="snow" aria-hidden="true"></div>
+
+  <main class="app">
+    <header class="hero">
+      <svg class="hero-gift" viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="8" y="26" width="48" height="32" rx="3" class="g-box"/>
+        <rect x="4" y="18" width="56" height="11" rx="3" class="g-lid"/>
+        <rect x="28" y="18" width="8" height="40" class="g-ribbon"/>
+        <path d="M32 18c-4-9-15-11-15-4 0 4 8 5 15 4zM32 18c4-9 15-11 15-4 0 4-8 5-15 4z" class="g-bow"/>
+      </svg>
+      <p class="eyebrow">Navidad 2026</p>
+      <h1>Amigo Invisible</h1>
+    </header>
+
+    <section class="card" aria-live="polite">
+      <div class="notice notice-error" id="avisoConfig" hidden>
+        La aplicación todavía no está configurada. Edita <code>js/config.js</code> con los datos de Supabase.
+      </div>
+
+      <!-- A. ¿Eres Marisa? -->
+      <fieldset class="toggle">
+        <legend>¿Eres Marisa?</legend>
+        <div class="segmented">
+          <input type="radio" name="esMarisa" id="marisaNo" value="no" checked>
+          <label for="marisaNo">No</label>
+          <input type="radio" name="esMarisa" id="marisaSi" value="si">
+          <label for="marisaSi">Sí</label>
+          <span class="segmented-thumb" aria-hidden="true"></span>
+        </div>
+      </fieldset>
+
+      <!-- B + C. Participantes -->
+      <div class="panel" id="panelParticipante">
+        <form id="formNombre" novalidate autocomplete="off">
+          <label for="nombre" class="field-label">INTRODUCE EL NOMBRE DE LA PERSONA QUE TE HA TOCADO HACERLE UN REGALO</label>
+          <div class="combo">
+            <input id="nombre" name="nombre" type="text" inputmode="text" autocapitalize="words"
+                   spellcheck="false" maxlength="40" placeholder="Escribe o elige un nombre"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false"
+                   aria-controls="sugerencias" aria-describedby="errorNombre">
+            <ul id="sugerencias" class="suggestions" role="listbox" hidden></ul>
+          </div>
+          <p class="field-error" id="errorNombre" role="alert"></p>
+          <button type="submit" class="btn btn-primary" id="btnConfirmar">CONFIRMAR</button>
+        </form>
+
+        <div class="done" id="yaEnviado" hidden>
+          <div class="done-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </div>
+          <p class="done-title" id="yaEnviadoTitulo">¡Perfecto!</p>
+          <p class="done-text" id="yaEnviadoTexto">Tu respuesta se ha guardado correctamente. Ya no puedes modificarla.</p>
+        </div>
+      </div>
+
+      <!-- Marisa -->
+      <div class="panel" id="panelMarisa" hidden>
+        <p class="lead">Hola, Marisa. Cuando todos hayan contestado, descubrirás a quién te toca regalar.</p>
+        <label for="codigo" class="field-label field-label-sm">Tu código secreto</label>
+        <input id="codigo" type="password" autocomplete="off" autocapitalize="off"
+               spellcheck="false" maxlength="100" placeholder="Te lo ha dado el organizador"
+               aria-describedby="mensajeMarisa">
+        <button type="button" class="btn btn-gold" id="btnDescubrir">DESCUBRIR QUIÉN TE HA TOCADO</button>
+        <div class="notice" id="mensajeMarisa" role="alert" hidden></div>
+      </div>
+    </section>
+
+    <footer class="foot">Tu respuesta es secreta: nadie puede ver lo que han escrito los demás.</footer>
+  </main>
+
+  <!-- Modal de confirmación -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-cerrar></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" aria-describedby="modalTexto">
+      <p class="modal-name" id="modalNombre"></p>
+      <h2 id="modalTitulo">¿Estás seguro de que quieres enviar este nombre?</h2>
+      <p id="modalTexto">Una vez confirmado, no podrás modificarlo.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btnCancelar" data-cerrar>CANCELAR</button>
+        <button type="button" class="btn btn-primary" id="btnEnviar">CONFIRMAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revelación para Marisa -->
+  <div class="reveal" id="reveal" hidden>
+    <canvas id="confeti" aria-hidden="true"></canvas>
+    <div class="reveal-inner" role="dialog" aria-modal="true" aria-labelledby="revealTitulo">
+      <div class="big-gift" aria-hidden="true">
+        <div class="big-lid"><span class="big-bow"></span></div>
+        <div class="big-box"></div>
+      </div>
+      <div class="reveal-text">
+        <h2 id="revealTitulo">¡SORPRESA, MARISA! 🎁</h2>
+        <p>La persona que te ha tocado es:</p>
+        <p class="reveal-name" id="revealNombre"></p>
+        <button type="button" class="btn btn-ghost-light" id="btnCerrarReveal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
